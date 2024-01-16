@@ -4,6 +4,7 @@ using HomeApi.Contracts.Models.Rooms;
 using HomeApi.Data.Models;
 using HomeApi.Data.Repos;
 using Microsoft.AspNetCore.Mvc;
+using HomeApi.Data.Queries;
 
 namespace HomeApi.Controllers
 {
@@ -42,5 +43,20 @@ namespace HomeApi.Controllers
             
             return StatusCode(409, $"Ошибка: Комната {request.Name} уже существует.");
         }
+
+
+        [HttpPut]
+        [Route("Update")]
+        public async Task<IActionResult> UpdateRoom([FromBody] AddRoomRequest request)
+        {
+            var updateRoom = await _repository.GetRoomByName(request.Name);
+            if (updateRoom == null)
+                return StatusCode(400, $"Комната не найдена");
+
+            await _repository.UpdateRoom(updateRoom, new UpdateRoomQuery(request.Name, request.Area, request.GasConnected, request.Voltage));
+
+            return StatusCode(200, $"Комната {request.Name} была обновлена");
+        }
+
     }
 }
