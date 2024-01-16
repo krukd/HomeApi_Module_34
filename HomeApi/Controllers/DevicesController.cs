@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using HomeApi.Contracts.Models.Devices;
@@ -67,7 +68,30 @@ namespace HomeApi.Controllers
             
             return StatusCode(201, $"Устройство {request.Name} добавлено. Идентификатор: {newDevice.Id}");
         }
-        
+
+        /// <summary>
+        /// удаление устройства
+        /// </summary>
+        [HttpDelete]
+        [Route("{id}")]
+
+        public async Task<IActionResult> Delete(
+           [FromRoute] Guid id,
+           [FromBody] DeleteDeviceRequest request)
+        {
+
+            request.Id = id;
+
+            var devices = await _devices.GetDevices();
+            var explorerDevice = devices.FirstOrDefault(d => d.Id == request.Id);
+            if (explorerDevice == null || explorerDevice.Name != request.Name)
+                return StatusCode(400, $"Устройство {request.Name} не найдено");
+
+            await _devices.DeleteDevice(explorerDevice);
+            return StatusCode(200, $"Устройство {request.Name} успешно удалено");
+        }
+
+
         /// <summary>
         /// Обновление существующего устройства
         /// </summary>
